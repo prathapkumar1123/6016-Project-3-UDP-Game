@@ -1,0 +1,42 @@
+syntax = "proto2";
+
+package net;
+
+message UserInput {
+  required int32 id = 1;
+  required int32 input = 2;
+}
+
+message Player {
+  enum State {
+    IS_ACTIVE = 0;
+    IS_CONNECTED = 1;
+    HAS_AMMO = 2;
+  }
+
+  required int32 state = 1;
+  required Vector3 position = 2;
+  required Vector3 orientation = 4;
+}
+
+message Bullet {
+  enum State {
+    ACTIVE = 0;
+  }
+
+  required int32 state = 1;
+  required Vector3 position = 2;
+  required Vector3 velocity = 3;
+}
+
+message Vector3 {
+  required float x = 1;
+  required float y = 2;
+  required float z = 3;
+}
+
+message GameScene {
+  required int32 id = 1;
+  repeated Player players = 2;
+  repeated Bullet bullets = 3;
+}

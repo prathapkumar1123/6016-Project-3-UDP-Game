@@ -1,0 +1,6 @@
+Engine/x64/
+GameServer/x64/
+x64/
+
+.vs/
+packages/

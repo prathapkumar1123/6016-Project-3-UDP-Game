@@ -1,0 +1,47 @@
+{
+  "scene": {
+    "lights": {
+      "turnOn": false,
+      "drawLightsToModel": false,
+      "lights": [
+        {
+          "type": "point",
+          "position": [ 0, 30, 0 ],
+          "direction": [ 0, 0, 0 ],
+          "innerAngle": 0,
+          "outerAngle": 0,
+          "constantAttenuation": 4.0,
+          "linearAttenuation": 0.01,
+          "quadraticAttenuation": 0.01,
+          "diffuseColor": [ 1.0, 1.0, 1.0, 0.5 ],
+          "specularColor": [ 0.2, 0.2, 0.2, 1.0 ]
+        }
+      ]
+    },
+    "camera": {
+      "position": [ 0, 650, 760 ],
+      "pitch": -52,
+      "yaw": -90,
+      "cameraEye": [ 0, 0, 0 ],
+      "movementSpeed": 1.0,
+      "sensitivity": 1.0,
+      "front": [ 0, 0, -1 ],
+      "up": [ 0, 0.001, 0 ],
+      "right": [ 1, 0, 0 ],
+      "worldUp": [ 0, 1, 0 ]
+    },
+    "models": [
+      {
+        "name": "floor",
+        "file": "block.ply",
+        "position": [ 0, 0, 0 ],
+        "scale": [ 1000, 1, 1000 ],
+        "rotation": [ 0, 0, 0 ],
+        "setUniformDrawScale": false,
+        "uniformDrawScale": 1,
+        "useCustomColor": true,
+        "customColor": [ 0.1, 0.1, 0.1, 1.0 ]
+      }
+    ]
+  }
+}
