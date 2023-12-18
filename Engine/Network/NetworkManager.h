@@ -24,12 +24,19 @@
 #include <map>
 #include <iostream>
 
+#include "../Graphics/GameObject/GameObject.h"
+#include "../Game/Player.h"
+#include "../Game/Bullet.h"
+
+#include "../player_state.pb.h"
+
 namespace net
 {
 	const int NUM_PLAYERS = 4;
 
 	struct PlayerPosition
 	{
+		unsigned int id;
 		float x;
 		float z;
 	};
@@ -53,9 +60,12 @@ namespace net
 
 		void SendPlayerPositionToServer(float x, float z);
 
-		// 
-		// Positions of players
 		std::vector<PlayerPosition> m_NetworkedPositions;
+		//std::vector<Player*> mNetworkPlayers;
+
+		bool isNewPlayerAdded = false;
+
+		game::GameScene scene;
 
 	private:
 		void HandleRECV();
@@ -69,7 +79,7 @@ namespace net
 		sockaddr_in m_ServerAddr;
 		int m_ServerAddrLen = 0;
 
-
+		
 		PlayerPosition m_PlayerPosition;
 
 		// 

@@ -10,6 +10,11 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
+#include <Message.h>
+#include <Buffer.h>
+
+#include "player_state.pb.h"
+
 // Need to link Ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -20,6 +25,7 @@ namespace net
 {
 	struct PlayerPosition
 	{
+		unsigned int id;
 		float x;
 		float z;
 	};
@@ -58,6 +64,66 @@ namespace net
 		//
 		// ConnectedClients
 		std::vector<ClientInfo> m_ConnectedClients;
+
+		game::GameScene gameScene;
+
+		bool newConnectionAdded = false;
+
+
+        //std::string serializeGameScene(const GameScene& gameScene) {
+        //    std::ostringstream oss;
+
+        //    // Serialize the id
+        //    oss << gameScene.id << " ";
+
+        //    // Serialize each player
+        //    for (const auto& player : gameScene.players) {
+        //        oss << player.id << " " << player.isAlive << " " << player.isShot << " "
+        //            << player.position.x << " " << player.position.z << " " << player.state << " ";
+        //    }
+
+        //    // Serialize each bullet
+        //    for (const auto& bullet : gameScene.bullets) {
+        //        oss << static_cast<int>(bullet.state) << " " << bullet.position.x << " "
+        //            << bullet.position.z << " " << bullet.velocity.x << " " << bullet.velocity.z << " ";
+        //    }
+
+        //    return oss.str();
+        //}
+
+        //GameScene deserializeGameScene(const std::string& serializedString) {
+        //    GameScene gameScene;
+
+        //    std::istringstream iss(serializedString);
+
+        //    // Deserialize the id
+        //    iss >> gameScene.id;
+
+        //    // Deserialize each player
+        //    while (!iss.eof()) {
+        //        Player player;
+        //        iss >> player.id >> player.isAlive >> player.isShot
+        //            >> player.position.x >> player.position.z >> player.state;
+        //        gameScene.players.push_back(player);
+        //    }
+
+        //    // Reset the stream and ignore the trailing whitespace
+        //    iss.clear();
+        //    iss.ignore();
+
+        //    // Deserialize each bullet
+        //    while (!iss.eof()) {
+        //        Bullet bullet;
+        //        int bulletState;
+        //        iss >> bulletState >> bullet.position.x >> bullet.position.z
+        //            >> bullet.velocity.x >> bullet.velocity.z;
+        //        bullet.state = static_cast<BulletState>(bulletState);
+        //        gameScene.bullets.push_back(bullet);
+        //    }
+
+        //    return gameScene;
+        //}
+
 
 	};
 

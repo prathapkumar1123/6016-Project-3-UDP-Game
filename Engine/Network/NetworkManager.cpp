@@ -1,6 +1,9 @@
 #include "NetworkManager.h"
+#include <Buffer.h>
+#include <Message.h>
 
 #include <memory>
+
 
 #define SERVER_PORT 8412
 #define SERVER_IP "127.0.0.1"
@@ -10,15 +13,6 @@ namespace net
 	// Move this to a structure for each client
 	sockaddr_in addr;
 	int addrLen;
-
-	class Buffer
-	{
-	public:
-		Buffer() { }
-		~Buffer() { }
-
-		std::vector<uint8_t> data;
-	};
 
 	NetworkManager::NetworkManager()
 	{
@@ -67,6 +61,7 @@ namespace net
 		m_ServerAddrLen = sizeof(m_ServerAddr);
 
 		printf("NetworkManager running...\n");
+		printf("Socket ID: %d...\n", m_ServerSocket);
 
 		m_NextSendTime = std::chrono::high_resolution_clock::now();
 
@@ -112,33 +107,39 @@ namespace net
 
 	void NetworkManager::HandleRECV()
 	{
-		// Read
-		const int bufLen = sizeof(float) * 2 * NUM_PLAYERS;
-		char buffer[bufLen];
-		int result = recvfrom(m_ServerSocket, buffer, bufLen, 0, (SOCKADDR*)&m_ServerAddr, &m_ServerAddrLen);
+
+		const int bufSize = 1024;
+		Buffer* buffer = new Buffer(bufSize);
+
+		int result = recvfrom(m_ServerSocket, reinterpret_cast<char*>(buffer->m_BufferData.data()), 
+			bufSize, 0, (SOCKADDR*)&m_ServerAddr, &m_ServerAddrLen);
+
 		if (result == SOCKET_ERROR) {
-			if (WSAGetLastError() == WSAEWOULDBLOCK)
-			{
-				// Not a real error, we expect this.
-				// -1 is an error, 0 is disconnected, >0 is a message
-				// WSA uses this as a flag to check if it is a real error
+			if (WSAGetLastError() == WSAEWOULDBLOCK) {
 				return;
 			}
-			// TODO: We want to handle this differently.
 			printf("recvfrom failed with error %d\n", WSAGetLastError());
 			Destroy();
 			return;
 		}
 
+		if (result > 0) {
+			uint32_t packetSize = buffer->ReadUInt32LE();
+			uint32_t messageType = buffer->ReadUInt32LE();
+			uint32_t messageLength = buffer->ReadUInt32LE();
+			std::string msg = buffer->ReadString(messageLength);
+			
+			game::GameScene newScene;
+			newScene.Clear();
+			newScene.ParseFromString(msg);
 
-		memcpy(&m_NetworkedPositions[0].x, (const void*)&(buffer[0]), sizeof(float));
-		memcpy(&m_NetworkedPositions[0].z, (const void*)&(buffer[4]), sizeof(float));
-		memcpy(&m_NetworkedPositions[1].x, (const void*)&(buffer[8]), sizeof(float));
-		memcpy(&m_NetworkedPositions[1].z, (const void*)&(buffer[12]), sizeof(float));
-		memcpy(&m_NetworkedPositions[2].x, (const void*)&(buffer[16]), sizeof(float));
-		memcpy(&m_NetworkedPositions[2].z, (const void*)&(buffer[20]), sizeof(float));
-		memcpy(&m_NetworkedPositions[3].x, (const void*)&(buffer[24]), sizeof(float));
-		memcpy(&m_NetworkedPositions[3].z, (const void*)&(buffer[28]), sizeof(float));
+			scene.Clear();
+			scene = newScene;
+
+			std::cout << "Game Scene - " << scene.id() << ", Players Size - " << scene.players().size() << std::endl;
+		}
+
+		delete buffer;
 	}
 
 	void NetworkManager::SendDataToServer()
@@ -153,6 +154,7 @@ namespace net
 
 		// Add 20 ms to the next broadcast time from now()
 		//m_NextBroadcastTime 
+
 
 
 		// MessageQueue, loop through and send all messages

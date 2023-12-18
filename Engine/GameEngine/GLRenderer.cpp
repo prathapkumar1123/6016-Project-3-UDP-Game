@@ -132,6 +132,7 @@ void GLRenderer::run(double deltaTime) {
 
             glViewport(0, 0, width, height);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
             glEnable(GL_DEPTH_TEST);
             glCullFace(GL_FRONT_AND_BACK);
@@ -145,7 +146,7 @@ void GLRenderer::run(double deltaTime) {
                 1.0f
             );
 
-            glm::mat4 matProjection = glm::perspective(0.6f, ratio, 0.1f, 1000.0f);
+            glm::mat4 matProjection = glm::perspective(0.6f, ratio, 0.1f, 10000.0f);
             glm::mat4 matView = getCamera().getViewMatrix();
 
             GLint matProjection_UL = glGetUniformLocation(shaderProgramId, "matProjection");

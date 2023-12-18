@@ -1,8 +1,7 @@
 #include "NetworkManager.h"
 
-#include "NetworkManager.h"
-
 #include <memory>
+#include <string>
 
 #define SERVER_PORT 8412
 #define SERVER_IP "127.0.0.1"
@@ -13,17 +12,9 @@ namespace net
 	sockaddr_in addr;
 	int addrLen;
 
-	class Buffer
-	{
-	public:
-		Buffer() { }
-		~Buffer() { }
-
-		std::vector<uint8_t> data;
-	};
-
 	NetworkManager::NetworkManager()
 	{
+		gameScene.set_id(1);
 	}
 
 	NetworkManager::~NetworkManager()
@@ -69,6 +60,7 @@ namespace net
 			WSACleanup();
 			return;
 		}
+
 		printf("bind was successful!\n");
 
 		unsigned long nonblock = 1;
@@ -123,7 +115,7 @@ namespace net
 		sockaddr_in addr;
 		int addrLen = sizeof(addr);
 
-		const int bufLen = 8;	// recving 2 floats only
+		const int bufLen = sizeof(PlayerPosition);	// recving 2 floats only
 		char buffer[bufLen];
 		int result = recvfrom(m_ListenSocket, buffer, bufLen, 0, (SOCKADDR*)&addr, &addrLen);
 		if (result == SOCKET_ERROR) {
@@ -167,15 +159,34 @@ namespace net
 			newClient.addr = addr;
 			newClient.addrLen = sizeof(addr);
 			m_ConnectedClients.push_back(newClient);
+
 			clientId = m_ConnectedClients.size() - 1;
+
+			game::Player player;
+			player.set_id(clientId);
+			player.set_isalive(true);
+			player.set_isshot(false);
+			player.set_state(game::IS_ACTIVE);
+
+			game::vec2* playerPosition = player.mutable_position();
+			playerPosition->set_x(0.0f);
+			playerPosition->set_z(0.0f);
+
+			gameScene.add_players()->CopyFrom(player);
+
+			std::string gameSceneMsg = "";
+			gameScene.SerializeToString(&gameSceneMsg);
 		}
+
 
 		ClientInfo& client = m_ConnectedClients[clientId];
 
 		memcpy(&client.x, (const void*)&(buffer[0]), sizeof(float));
 		memcpy(&client.z, (const void*)&(buffer[4]), sizeof(float));
+		memcpy(&client.id, (const void*)&(buffer[8]), sizeof(unsigned int));
 
-		printf("From: %s:%d: {%.2f, %.2f}\n", inet_ntoa(client.addr.sin_addr), client.addr.sin_port, client.x, client.z);
+
+		//printf("From: %s:%d: {%.2f, %.2f, %d}\n", inet_ntoa(client.addr.sin_addr), client.addr.sin_port, client.x, client.z, client.id);
 	}
 
 	void NetworkManager::BroadcastUpdatesToClients()
@@ -186,39 +197,54 @@ namespace net
 			return;
 		}
 
-		printf("broadcast!\n");
-
 		m_NextBroadcastTime = currentTime + std::chrono::milliseconds(200);
 
-		// Add 20 ms to the next broadcast time from now()
-		//m_NextBroadcastTime 
-
-		const int length = sizeof(PlayerPosition) * 4;
-		char data[length];
-
-
-		PlayerPosition positions[4];
-
-		for (int i = 0; i < m_ConnectedClients.size(); i++)
-		{
-			memcpy(&data[i * sizeof(PlayerPosition)], &m_ConnectedClients[i].x, sizeof(float));
-			memcpy(&data[i * sizeof(PlayerPosition) + sizeof(float)], &m_ConnectedClients[i].z, sizeof(float));
-		}
-
-		// Write
 		for (int i = 0; i < m_ConnectedClients.size(); i++)
 		{
 			ClientInfo& client = m_ConnectedClients[i];
-			int result = sendto(m_ListenSocket, &data[0], length, 0, (SOCKADDR*)&client.addr, client.addrLen);
+
+			gameScene.set_id(gameScene.id() + 1);
+
+			std::string gameSceneMsg;
+			gameScene.SerializeToString(&gameSceneMsg);
+
+			Message message;
+			message.message = gameSceneMsg;
+			message.messageLength = gameSceneMsg.length();
+			message.header.messageType = DATA;
+			message.header.packetSize = message.message.length() +
+				sizeof(message.messageLength) +
+				sizeof(message.header.messageType) +
+				sizeof(message.header.packetSize);
+
+			const int bufSize = 32;
+			Buffer buffer(bufSize);
+
+			// Write our packet to the buffer
+			buffer.WriteUInt32LE(message.header.packetSize);
+			buffer.WriteUInt32LE(message.header.messageType);
+			buffer.WriteUInt32LE(message.messageLength);
+			buffer.WriteString(message.message);
+
+			int result = sendto(m_ListenSocket, reinterpret_cast<const char*>(buffer.m_BufferData.data()), 
+				bufSize, 0, (SOCKADDR*)&client.addr, client.addrLen);
+
 			if (result == SOCKET_ERROR) {
-				// TODO: We want to handle this differently.
 				printf("send failed with error %d\n", WSAGetLastError());
 				closesocket(m_ListenSocket);
 				WSACleanup();
 				return;
 			}
+
+			for (int i = 0; i < gameScene.players_size(); i++) {
+				std::cout << "Player Id - " << gameScene.players().Get(i).id();
+			}
+
+			printf("\n");
+
+			//std::cout << "Game Scene - " << gameScene.id() << ", Players Size - " << gameScene.players().size() << std::endl;
 		}
 	}
 
 
-} // namespace net
+}

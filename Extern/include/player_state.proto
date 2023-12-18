@@ -1,0 +1,45 @@
+syntax = "proto2";
+
+package game;
+
+enum State {
+  IS_ACTIVE = 0;
+  IS_DEAD = 1;
+}
+
+message vec2 {
+  required float x = 1;
+  required float z = 2;
+}
+
+message UserInput {
+  required int32 id = 1;
+  required int32 input = 2;
+}
+
+message Player {
+  required int32 id = 1;
+  required bool isAlive = 2;
+  required bool isShot = 3;
+  required vec2 position = 4;
+  required int32 state = 5;
+}
+
+message Bullet {
+  enum State {
+    ACTIVE = 0;
+    IN_ACTIVE = 1;
+  }
+
+  required int32 state = 1;
+  required vec2 position = 2;
+  required vec2 velocity = 3;
+}
+
+message GameScene {
+  required int32 id = 1;
+  repeated Player players = 2;
+  repeated Bullet bullets = 3;
+}
+
+ 

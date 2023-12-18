@@ -18,7 +18,7 @@ public:
 
     void addPlayers();
 
-    std::vector<GameObject*> mNetworkPlayers;
+    std::vector<Player*> mNetworkPlayers;
 
 private:
 
@@ -26,5 +26,14 @@ private:
 
     std::string sceneFile;
     Player* player;
+
+    int currentPlayersAdded = 0;
+
+    std::vector<glm::vec4> playerColors = {
+        glm::vec4(1.f, 0.f, 0.f, 1.0f),
+        glm::vec4(0.f, 1.f, 0.f, 1.0f),
+        glm::vec4(0.f, 0.f, 1.f, 1.0f),
+        glm::vec4(1.f, 0.f, 1.f, 1.0f),
+    };
 
 };

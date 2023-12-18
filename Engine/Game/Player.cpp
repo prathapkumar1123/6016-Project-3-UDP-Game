@@ -1,6 +1,9 @@
 #include "Player.h"
 #include "Bullet.h"
 
+#include "../Core/RandomGenerator.h"
+
+
 #include <iostream>
 
 Player::Player(): GameObject(PLAYER_BACK_1) {
@@ -9,6 +12,11 @@ Player::Player(): GameObject(PLAYER_BACK_1) {
 	this->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
 	this->isRigidBody = true;
 	this->isPlayerAlive = true;
+	this->bUseDebugColours = true;
+	this->bDoNotLight = true;
+	this->setUniformDrawScale(0.3f);
+
+	this->wholeObjectDebugColourRGBA = glm::vec4(genRandom(0.f, 1.f), genRandom(0.f, 1.f), genRandom(0.f, 1.f), 1.f);
 
 	this->shapeType = AABB;
 	this->pShape = new sPhysicsProperties::sAABB(this->getBoundingBoxMin(), this->getBoundingBoxMax());
@@ -27,8 +35,8 @@ void Player::update(float deltaTime) {
 		setPlayerToDeath();
 	}
 	
-	this->velocity += this->acceleration * deltaTime;
-	this->drawPosition += this->velocity * deltaTime;
+	//this->velocity += this->acceleration * deltaTime;
+	//this->drawPosition += this->velocity * deltaTime;
 
 	//updateCameraPosition();
 }

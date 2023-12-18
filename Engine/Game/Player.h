@@ -28,8 +28,10 @@ public:
 	std::vector<GameObject*>* mObjectsToDraw;
 
 	bool isPlayerAlive;
+	int playerId;
 
 private:
+
 
 	glm::vec3 lastPosition;
 	float lastUpdatedTime;
@@ -41,6 +43,7 @@ private:
 
 	int health = DEFAULT_PLAYER_HEALTH;
 
-	float shootDelay = 0.2f;
+
+	float shootDelay = 2.0f;
 };
 

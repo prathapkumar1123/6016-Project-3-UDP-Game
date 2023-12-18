@@ -19,8 +19,8 @@
       ]
     },
     "camera": {
-      "position": [ 0, 650, 760 ],
-      "pitch": -52,
+      "position": [ 0, 360, 900 ],
+      "pitch": -28,
       "yaw": -90,
       "cameraEye": [ 0, 0, 0 ],
       "movementSpeed": 1.0,
